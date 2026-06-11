@@ -1,4 +1,5 @@
 package com.navya.job_portal.security;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,28 +14,35 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-    @Component
-    public class JwtFilter extends OncePerRequestFilter {
+@Component
+public class JwtFilter extends OncePerRequestFilter {
 
-        @Autowired
-        private JwtUtil jwtUtil;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-        @Autowired
-        private UserDetailsServiceImpl userDetailsService;
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
 
-        @Override
-        protected void doFilterInternal(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        FilterChain filterChain)
-                throws ServletException, IOException {
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/api/auth/");
+    }
 
-            String authHeader = request.getHeader("Authorization");
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
+        String authHeader = request.getHeader("Authorization");
 
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
             String token = authHeader.substring(7);
             String email = jwtUtil.extractEmail(token);
 
@@ -59,7 +67,10 @@ import java.io.IOException;
                             .setAuthentication(authToken);
                 }
             }
-            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            System.out.println("JWT Filter error: " + e.getMessage());
         }
-    }
 
+        filterChain.doFilter(request, response);
+    }
+}
