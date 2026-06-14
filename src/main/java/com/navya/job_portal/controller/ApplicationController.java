@@ -1,9 +1,11 @@
-
 package com.navya.job_portal.controller;
 
 import com.navya.job_portal.dto.request.StatusUpdateRequest;
 import com.navya.job_portal.dto.response.ApplicationResponse;
 import com.navya.job_portal.service.ApplicationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,15 +13,19 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-        import java.util.List;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/applications")
+@Tag(name = "Applications", description = "Job application APIs")
+@SecurityRequirement(name = "Bearer Authentication")
 public class ApplicationController {
 
     @Autowired
     private ApplicationService applicationService;
 
+    @Operation(summary = "Apply for a job",
+            description = "Only JOBSEEKER can apply")
     @PostMapping("/apply/{jobId}")
     public ResponseEntity<ApplicationResponse> applyForJob(
             @PathVariable Long jobId,
@@ -28,6 +34,8 @@ public class ApplicationController {
                 applicationService.applyForJob(jobId, userDetails.getUsername()));
     }
 
+    @Operation(summary = "View my applications",
+            description = "Jobseeker views all jobs they applied to")
     @GetMapping("/my-applications")
     public ResponseEntity<List<ApplicationResponse>> getMyApplications(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -35,6 +43,8 @@ public class ApplicationController {
                 applicationService.getMyApplications(userDetails.getUsername()));
     }
 
+    @Operation(summary = "View applicants for a job",
+            description = "Employer views all applicants for their job")
     @GetMapping("/job/{jobId}")
     public ResponseEntity<List<ApplicationResponse>> getApplicantsForJob(
             @PathVariable Long jobId,
@@ -43,6 +53,8 @@ public class ApplicationController {
                 applicationService.getApplicantsForJob(jobId, userDetails.getUsername()));
     }
 
+    @Operation(summary = "Update application status",
+            description = "Employer updates status: APPLIED, REVIEWED, ACCEPTED, REJECTED")
     @PutMapping("/{applicationId}/status")
     public ResponseEntity<ApplicationResponse> updateStatus(
             @PathVariable Long applicationId,
@@ -52,6 +64,8 @@ public class ApplicationController {
                 applicationService.updateStatus(applicationId, request, userDetails.getUsername()));
     }
 
+    @Operation(summary = "Withdraw application",
+            description = "Jobseeker withdraws their own application")
     @DeleteMapping("/{applicationId}")
     public ResponseEntity<String> withdrawApplication(
             @PathVariable Long applicationId,
