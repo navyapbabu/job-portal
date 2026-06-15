@@ -3,8 +3,7 @@
 A full-featured Job Portal backend REST API built with Java Spring Boot, JWT Authentication, and MySQL.
 
 ## 🚀 Live Demo
-API Documentation: [Swagger UI](https://job-portal.railway.app/swagger-ui/index.html)
-
+API Documentation: [Swagger UI](https://job-portal-production-aec2.up.railway.app/swagger-ui/index.html)
 ## 🛠️ Tech Stack
 
 | Technology | Purpose |
